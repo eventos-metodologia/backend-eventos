@@ -7,6 +7,8 @@ import { BD_HOST, BD_NAME, BD_PASSWORD, BD_PORT, BD_USER, DB_TYPE } from './conf
 import { MetodoPagoModule } from './metodo_pago/metodo_pago.module';
 import { SeederModule } from './config/seeder/seeder.module';
 import { EventosModule } from './eventos/eventos.module';
+import { RegisterEventModule } from './register_event/register_event.module';
+import { MailerModule } from './mailer/mailer.module';
 
 @Module({
   imports: [
@@ -29,7 +31,9 @@ import { EventosModule } from './eventos/eventos.module';
     }),
     MetodoPagoModule,
     SeederModule,
-    EventosModule
+    EventosModule,
+    RegisterEventModule,
+    MailerModule
   ],
   controllers: [AppController],
   providers: [AppService],
