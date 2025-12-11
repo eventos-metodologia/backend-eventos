@@ -7,6 +7,8 @@ export class EventoEntity{
     id:number;
     @Column({type:"varchar", length:100, unique:true, nullable:false})
     nombre:string;
+    @Column({type:"text", nullable:false})
+    descripcion:string;
     @Column({type:"date", nullable:false})
     fecha:Date;
     @Column({type:"varchar", length:100, nullable:false})
@@ -17,6 +19,8 @@ export class EventoEntity{
     organizador:string;
     @Column({type:"varchar", length:50, nullable:false})
     valor:string;
+    @Column({type:"boolean", default:false})
+    closed:boolean;
 
     @OneToMany(()=>RegistrarEventoEntity,(registro)=>registro.evento)
     registros:RegistrarEventoEntity[];
