@@ -18,7 +18,7 @@ import { BD_HOST, BD_NAME, BD_PASSWORD, BD_PORT, BD_USER, DB_TYPE } from './conf
         password: configService.get(BD_PASSWORD),
         database: configService.get(BD_NAME),
         entities: [__dirname +'/**/*.entity{.ts,.js}'],
-        shronyze:true,
+        synchronize:true,
         migrationsRun:false,
         logging:true,
       }),
