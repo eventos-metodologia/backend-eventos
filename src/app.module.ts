@@ -4,6 +4,9 @@ import { AppService } from './app.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { BD_HOST, BD_NAME, BD_PASSWORD, BD_PORT, BD_USER, DB_TYPE } from './config/constants';
+import { MetodoPagoModule } from './metodo_pago/metodo_pago.module';
+import { SeederModule } from './config/seeder/seeder.module';
+import { EventosModule } from './eventos/eventos.module';
 
 @Module({
   imports: [
@@ -23,7 +26,10 @@ import { BD_HOST, BD_NAME, BD_PASSWORD, BD_PORT, BD_USER, DB_TYPE } from './conf
         logging:true,
       }),
       inject:[ConfigService]
-    })
+    }),
+    MetodoPagoModule,
+    SeederModule,
+    EventosModule
   ],
   controllers: [AppController],
   providers: [AppService],
