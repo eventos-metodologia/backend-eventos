@@ -1,9 +1,11 @@
-export const BD_HOST= "BD_HOST"
-export const BD_USER= "BD_USER"
-export const BD_PASSWORD= "BD_PASSWORD"
-export const DB_TYPE="DB_TYPE"
-export const BD_NAME= "BD_NAME"
-export const BD_PORT= "BD_PORT"
+export const BD_HOST = 'DB_HOST';
+export const BD_PORT = 'DB_PORT';
+export const BD_USER = 'DB_USER';
+export const BD_PASSWORD = 'DB_PASSWORD';
+export const BD_NAME = 'DB_NAME';
+
+export const JWT_SECRET= "JWT_SECRET"
+
 export const APP_PORT= "APP_PORT"
 
 export const URL_FRONTEND ="URL_FRONTEND"
