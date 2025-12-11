@@ -5,12 +5,14 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { RegistrarEventoEntity } from './entity/register.evento.entity';
 import { MetodoPagoModule } from 'src/metodo_pago/metodo_pago.module';
 import { EventosModule } from 'src/eventos/eventos.module';
+import { MailModule } from 'src/mailer/mail.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([RegistrarEventoEntity]),
     MetodoPagoModule,
-    EventosModule
+    EventosModule,
+    MailModule
   ],
   controllers: [RegisterEventController],
   providers: [RegisterEventService],
