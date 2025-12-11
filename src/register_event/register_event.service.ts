@@ -153,4 +153,22 @@ export class RegisterEventService {
         }
     }
 
+    async delteRegister(id: number): Promise<{message: string}> {
+        try {
+            if(!id || id <=0 || isNaN(id)){
+                throw new BadRequestException('ID de registro inválido');
+            }
+            const registerExists = await this.registrarEventoRepository.createQueryBuilder('registro')
+                .where('registro.id = :id', { id })
+                .getOne();
+            if(!registerExists){
+                throw new BadRequestException(`No se encontró ningún registro con ID ${id}`);
+            }
+            await this.registrarEventoRepository.delete(id);
+            return {message: `Registro con ID ${id} eliminado exitosamente.`};
+        } catch (error) {
+            throw error;
+        }
+    }
+
 }

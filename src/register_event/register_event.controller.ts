@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post } from '@nestjs/common';
 import { RegisterEventService } from './register_event.service';
 import { CreateRegsterDto } from './dto/create.register.dto';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
@@ -374,5 +374,41 @@ export class RegisterEventController {
     })
     async getRegistersByPhone(@Param('telefono') telefono:string){
         return this.registerEventService.getRegisterByPhone(telefono);
+    }
+
+    @Delete(":id")
+    @ApiOperation({ summary: 'Eliminar un registro por ID' })
+    @ApiResponse({
+        status: 200,
+        description: 'Registro eliminado exitosamente.',
+        schema: {
+            example: {
+                message: 'Registro con ID 8 eliminado exitosamente.'
+            }
+        }
+    })
+    @ApiResponse({
+        status: 400,
+        description: 'No se encontró ningún registro con el ID proporcionado.',
+        schema: {
+            example: {
+                message: 'No se encontró ningún registro con ID 7',
+                error: 'Bad Request',
+                statusCode: 400
+            }
+        }
+    })
+    @ApiResponse({
+        status: 500,
+        description: 'Error interno del servidor.',
+        schema: {
+            example: {
+                statusCode: 500,
+                message: 'Internal server error'
+            }
+        }
+    })
+    async deleteRegister(@Param('id') id: number) {
+        return this.registerEventService.delteRegister(id);
     }
 }
