@@ -9,6 +9,7 @@ import { EventoEntity } from './entity/evento.entity';
     TypeOrmModule.forFeature([EventoEntity]),
   ],
   controllers: [EventosController],
-  providers: [EventosService]
+  providers: [EventosService],
+  exports: [EventosService]
 })
 export class EventosModule {}
