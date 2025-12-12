@@ -15,58 +15,58 @@ export class EventosService {
         private readonly eventoRepository: Repository<EventoEntity>,
         private readonly userService: UserService,
         private readonly categoriaService: CategoriaService,
-    ){}
+    ) { }
 
-    async findAll(dto:SearchEventosDto): Promise<EventoEntity[]>{
+    async findAll(dto: SearchEventosDto): Promise<EventoEntity[]> {
         try {
             const queryBuilder = this.eventoRepository.createQueryBuilder('evento');
-            if(dto.searchParam){
+            if (dto.searchParam) {
                 queryBuilder.andWhere('evento.nombre LIKE :searchParam OR evento.descripcion LIKE :searchParam OR evento.ubicacion LIKE :searchParam OR evento.organizador LIKE :searchParam', { searchParam: `%${dto.searchParam}%` });
             }
-            if(dto.fechaInicio){
+            if (dto.fechaInicio) {
                 queryBuilder.andWhere('evento.fecha >= :fechaInicio', { fechaInicio: dto.fechaInicio });
             }
-            if(dto.fechaFin){
+            if (dto.fechaFin) {
                 queryBuilder.andWhere('evento.fecha <= :fechaFin', { fechaFin: dto.fechaFin });
             }
-            if(dto.horaInicio){
+            if (dto.horaInicio) {
                 queryBuilder.andWhere('evento.hora >= :horaInicio', { horaInicio: dto.horaInicio });
             }
-            if(dto.horaFin){
+            if (dto.horaFin) {
                 queryBuilder.andWhere('evento.hora <= :horaFin', { horaFin: dto.horaFin });
             }
-            if(dto.orderBy){
+            if (dto.orderBy) {
                 const orderDirection = dto.orderDirection || 'ASC';
                 queryBuilder.orderBy(`evento.${dto.orderBy}`, orderDirection);
             }
-            if(dto.free !== undefined){
-                if(dto.free){
+            if (dto.free !== undefined) {
+                if (dto.free) {
                     queryBuilder.andWhere('evento.valor = 0');
-                }else{
+                } else {
                     queryBuilder.andWhere('evento.valor > 0');
                 }
             }
             const eventos = await queryBuilder.getMany();
-            if(eventos.length === 0){
+            if (eventos.length === 0) {
                 throw new NotFoundException('No se encontraron eventos que coincidan con los criterios de búsqueda.');
             }
             return eventos;
 
-    
+
         } catch (error) {
             throw error;
         }
     }
 
-    async findById(id:number): Promise<EventoEntity>{
+    async findById(id: number): Promise<EventoEntity> {
         try {
-            if(!id || id <= 0 || isNaN(id)){
+            if (!id || id <= 0 || isNaN(id)) {
                 throw new BadRequestException('El ID proporcionado no es válido.');
             }
             const evento = await this.eventoRepository.createQueryBuilder('evento')
                 .where('evento.id = :id', { id })
                 .getOne();
-            if(!evento){
+            if (!evento) {
                 throw new NotFoundException(`No se encontró ningún evento con ID ${id}.`);
             }
             return evento;
@@ -75,9 +75,9 @@ export class EventosService {
         }
     }
 
-    async create(evento: CreateEventoDto):Promise<EventoEntity>{
+    async create(evento: CreateEventoDto): Promise<EventoEntity> {
         try {
-            const user= await this.userService.findById(evento.userid);
+            const user = await this.userService.findById(evento.userid);
             const categoria = await this.categoriaService.findById(evento.categriaId);
 
             const newEvento = this.eventoRepository.create({
@@ -97,15 +97,15 @@ export class EventosService {
             throw error;
         }
     }
-    async delete(id:number):Promise<{message:string}>{
+    async delete(id: number): Promise<{ message: string }> {
         try {
-            if(!id || id <= 0 || isNaN(id)){
+            if (!id || id <= 0 || isNaN(id)) {
                 throw new BadRequestException('El ID proporcionado no es válido.');
             }
             const evento = await this.eventoRepository.createQueryBuilder('evento')
                 .where('evento.id = :id', { id })
                 .getOne();
-            if(!evento){
+            if (!evento) {
                 throw new NotFoundException(`No se encontró ningún evento con ID ${id}.`);
             }
             await this.eventoRepository.remove(evento);
@@ -115,45 +115,45 @@ export class EventosService {
         }
     }
 
-    async update(id:number, eventoUpdate:UpdateEventoDto):Promise<EventoEntity>{
+    async update(id: number, eventoUpdate: UpdateEventoDto): Promise<EventoEntity> {
         try {
-            if(!id || id <= 0 || isNaN(id)){
+            if (!id || id <= 0 || isNaN(id)) {
                 throw new BadRequestException('El ID proporcionado no es válido.');
             }
             const evento = await this.eventoRepository.createQueryBuilder('evento')
                 .where('evento.id = :id', { id })
                 .getOne();
-            if(!evento){
+            if (!evento) {
                 throw new NotFoundException(`No se encontró ningún evento con ID ${id}.`);
             }
-            if(eventoUpdate.nombre !== undefined){
+            if (eventoUpdate.nombre !== undefined) {
                 evento.nombre = eventoUpdate.nombre;
             }
-            if(eventoUpdate.fecha !== undefined){
+            if (eventoUpdate.fecha !== undefined) {
                 evento.fecha = eventoUpdate.fecha;
             }
-            if(eventoUpdate.hora !== undefined){
+            if (eventoUpdate.hora !== undefined) {
                 evento.hora = eventoUpdate.hora;
             }
-            if(eventoUpdate.ubicacion !== undefined){
+            if (eventoUpdate.ubicacion !== undefined) {
                 evento.ubicacion = eventoUpdate.ubicacion;
             }
-            if(eventoUpdate.organizador !== undefined){
+            if (eventoUpdate.organizador !== undefined) {
                 evento.organizador = eventoUpdate.organizador;
             }
-            if(eventoUpdate.descripcion !== undefined){
+            if (eventoUpdate.descripcion !== undefined) {
                 evento.descripcion = eventoUpdate.descripcion;
             }
-            if(eventoUpdate.valor !== undefined){
+            if (eventoUpdate.valor !== undefined) {
                 evento.valor = eventoUpdate.valor;
             }
-            if(eventoUpdate.imagen !== undefined){
+            if (eventoUpdate.imagen !== undefined) {
                 evento.imagen = eventoUpdate.imagen;
             }
-            if(evento.user  && eventoUpdate.userId == undefined){
+            if (evento.user && eventoUpdate.userId == undefined) {
                 throw new BadRequestException('El ID del usuario es obligatorio.');
             }
-            if(evento.user.id !== eventoUpdate.userId && eventoUpdate.userId !== undefined){
+            if (evento.user.id !== eventoUpdate.userId && eventoUpdate.userId !== undefined) {
                 throw new BadRequestException("no tiene permiso para actualizar este evento.");
             }
 
@@ -163,9 +163,9 @@ export class EventosService {
         }
     }
 
-    async getEventosByUserId(userId:number):Promise<EventoEntity[]>{
+    async getEventosByUserId(userId: number): Promise<EventoEntity[]> {
         try {
-            if(!userId || userId <= 0 || isNaN(userId)){
+            if (!userId || userId <= 0 || isNaN(userId)) {
                 throw new BadRequestException('El ID de usuario proporcionado no es válido.');
             }
             const eventos = await this.eventoRepository.createQueryBuilder('evento')
@@ -176,5 +176,15 @@ export class EventosService {
         } catch (error) {
             throw error;
         }
+    }
+
+    async findByCategoria(categoriaId: number) {
+        return this.eventoRepository.find({
+            where: {
+                categoria: { id: categoriaId }
+            },
+            relations: ['categoria', 'user'],
+            order: { fecha: 'ASC' }
+        });
     }
 }

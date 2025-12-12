@@ -10,7 +10,7 @@ import { UpdateEventoDto } from './dto/update.evento.sto';
 export class EventosController {
     constructor(
         private readonly eventosService: EventosService
-    ){}
+    ) { }
     @ApiOperation({ summary: 'Obtener todos los eventos' })
     @Post("all")
     @ApiResponse({
@@ -57,7 +57,7 @@ export class EventosController {
             }
         }
     })
-    async findAll(@Body() body:SearchEventosDto){
+    async findAll(@Body() body: SearchEventosDto) {
         return this.eventosService.findAll(body);
     }
 
@@ -84,7 +84,7 @@ export class EventosController {
             }
         }
     })
-    async findById(@Param('id') id:number){
+    async findById(@Param('id') id: number) {
         return this.eventosService.findById(id);
     }
 
@@ -140,7 +140,7 @@ export class EventosController {
             }
         }
     })
-    async create(@Body() body:CreateEventoDto){
+    async create(@Body() body: CreateEventoDto) {
         return this.eventosService.create(body);
     }
 
@@ -207,7 +207,7 @@ export class EventosController {
             }
         }
     })
-    async getByuser(@Param('idUser') idUser:number){
+    async getByuser(@Param('idUser') idUser: number) {
         return this.eventosService.getEventosByUserId(idUser);
     }
 
@@ -263,7 +263,7 @@ export class EventosController {
             }
         }
     })
-    async update(@Param('id') id:number, @Body() body:UpdateEventoDto){
+    async update(@Param('id') id: number, @Body() body: UpdateEventoDto) {
         return this.eventosService.update(id, body);
     }
 
@@ -299,7 +299,14 @@ export class EventosController {
             }
         }
     })
-    async delete(@Param('id') id:number){
+    async delete(@Param('id') id: number) {
         return this.eventosService.delete(id);
+    }
+
+    @Get("category/:id")
+    @ApiOperation({ summary: 'Obtener eventos por ID de categoría' })
+    @ApiResponse({ status: 200, description: 'Eventos de la categoría.' })
+    async getByCategoria(@Param('id') id: number) {
+        return this.eventosService.findByCategoria(id);
     }
 }
