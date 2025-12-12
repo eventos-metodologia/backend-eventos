@@ -12,9 +12,11 @@ import { RegisterEventModule } from './register_event/register_event.module';
 import { MailModule } from './mailer/mail.module';
 import { CategoriaModule } from './categoria/categoria.module';
 import { UserModule } from './user/user.module';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
+    ScheduleModule.forRoot(),
     ConfigModule.forRoot({
       envFilePath: '.env',
       isGlobal: true,

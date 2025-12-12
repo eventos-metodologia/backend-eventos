@@ -7,6 +7,7 @@ import { CreateEventoDto } from './dto/create.evento.dto';
 import { UpdateEventoDto } from './dto/update.evento.sto';
 import { UserService } from 'src/user/user.service';
 import { CategoriaService } from 'src/categoria/categoria.service';
+import { Cron, CronExpression } from '@nestjs/schedule';
 
 @Injectable()
 export class EventosService {
@@ -213,5 +214,31 @@ export class EventosService {
         } catch (error) {
             throw error;
         }
+    }
+
+    verifyAndClosedEventHora():void{
+        try {
+            console.log('Iniciando verificación de eventos para cierre automático...');
+            const currentDate = new Date();
+            this.eventoRepository.find({ where: { closed: false } }).then(eventos => {
+                eventos.forEach(async (evento) => {
+                    const eventDateTime = new Date(`${evento.fecha}T${evento.hora}`);
+                    if (currentDate >= eventDateTime) {
+                        evento.closed = true;
+                        await this.eventoRepository.save(evento);
+                        console.log(`Evento con ID ${evento.id} cerrado automáticamente.`);
+                    }
+                });
+            }).catch(error => {
+                console.error('Error al verificar eventos para cierre automático:', error);
+            });
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    @Cron(CronExpression.EVERY_5_MINUTES)
+    handleVerifyAndClosedEventHoraCron() {
+        this.verifyAndClosedEventHora();
     }
 }
