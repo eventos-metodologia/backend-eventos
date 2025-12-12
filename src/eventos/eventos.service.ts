@@ -7,6 +7,7 @@ import { CreateEventoDto } from './dto/create.evento.dto';
 import { UpdateEventoDto } from './dto/update.evento.sto';
 import { UserService } from 'src/user/user.service';
 import { CategoriaService } from 'src/categoria/categoria.service';
+import { Cron, CronExpression } from '@nestjs/schedule';
 
 @Injectable()
 export class EventosService {
@@ -90,7 +91,8 @@ export class EventosService {
                 valor: evento.valor,
                 imagen: evento.imagen,
                 categoria: categoria,
-                user: user
+                user: user,
+                capacidad: (evento.capacidad).toString(),
             });
             return await this.eventoRepository.save(newEvento);
         } catch (error) {
@@ -121,6 +123,7 @@ export class EventosService {
                 throw new BadRequestException('El ID proporcionado no es válido.');
             }
             const evento = await this.eventoRepository.createQueryBuilder('evento')
+                .leftJoinAndSelect('evento.user', 'user')
                 .where('evento.id = :id', { id })
                 .getOne();
             if (!evento) {
@@ -156,6 +159,13 @@ export class EventosService {
             if (evento.user.id !== eventoUpdate.userId && eventoUpdate.userId !== undefined) {
                 throw new BadRequestException("no tiene permiso para actualizar este evento.");
             }
+            if(eventoUpdate.categriaId !== undefined){
+                const categoria =  await this.categoriaService.findById(eventoUpdate.categriaId);
+                evento.categoria = categoria;
+            }
+            if(eventoUpdate.capacidad !== undefined){
+                evento.capacidad = (eventoUpdate.capacidad).toString();
+            }
 
             return await this.eventoRepository.save(evento);
         } catch (error) {
@@ -186,5 +196,49 @@ export class EventosService {
             relations: ['categoria', 'user'],
             order: { fecha: 'ASC' }
         });
+    }
+
+    async closedEevent(eventId:number): Promise<EventoEntity> {
+        try {
+            if (!eventId || eventId <= 0 || isNaN(eventId)) {
+                throw new BadRequestException('El ID proporcionado no es válido.');
+            }
+            const evento = await this.eventoRepository.createQueryBuilder('evento')
+                .where('evento.id = :eventId', { eventId })
+                .getOne();
+            if (!evento) {
+                throw new NotFoundException(`No se encontró ningún evento con ID ${eventId}.`);
+            }  
+            evento.closed = true;
+            return await this.eventoRepository.save(evento);
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    verifyAndClosedEventHora():void{
+        try {
+            console.log('Iniciando verificación de eventos para cierre automático...');
+            const currentDate = new Date();
+            this.eventoRepository.find({ where: { closed: false } }).then(eventos => {
+                eventos.forEach(async (evento) => {
+                    const eventDateTime = new Date(`${evento.fecha}T${evento.hora}`);
+                    if (currentDate >= eventDateTime) {
+                        evento.closed = true;
+                        await this.eventoRepository.save(evento);
+                        console.log(`Evento con ID ${evento.id} cerrado automáticamente.`);
+                    }
+                });
+            }).catch(error => {
+                console.error('Error al verificar eventos para cierre automático:', error);
+            });
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    @Cron(CronExpression.EVERY_5_MINUTES)
+    handleVerifyAndClosedEventHoraCron() {
+        this.verifyAndClosedEventHora();
     }
 }
