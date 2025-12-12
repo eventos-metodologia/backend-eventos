@@ -120,6 +120,17 @@ export class EventosController {
         }
     })
     @ApiResponse({
+        status: 404,
+        description: 'No se encontró ningún usuario con ID proporcionado.',
+        schema: {
+            example: {
+                message: 'No se encontró ningún usuario con ID 4.',
+                error: 'Not Found',
+                statusCode: 404
+            }
+        }
+    })
+    @ApiResponse({
         status: 500,
         description: 'Error interno del servidor.',
         schema: {
@@ -131,6 +142,73 @@ export class EventosController {
     })
     async create(@Body() body:CreateEventoDto){
         return this.eventosService.create(body);
+    }
+
+    @Get("user/events/:idUser")
+    @ApiOperation({ summary: 'Obtener eventos por ID de usuario' })
+    @ApiResponse({
+        status: 200,
+        description: 'Lista de eventos del usuario.',
+        schema: {
+            type: 'array',
+            items: {
+                type: 'object',
+                properties: {
+                    id: { type: 'number', example: 5 },
+                    nombre: { type: 'string', example: 'Concierto de Rock' },
+                    descripcion: { type: 'string', example: 'Un gran concierto de rock con bandas famosas.' },
+                    fecha: { type: 'string', example: '2025-07-15' },
+                    hora: { type: 'string', example: '20:00' },
+                    ubicacion: { type: 'string', example: 'Auditorio Nacional' },
+                    organizador: { type: 'string', example: 'Juan Perez' },
+                    valor: { type: 'string', example: '50.00' },
+                    closed: { type: 'boolean', example: false },
+                    imagen: { type: 'string', example: 'http://example.com/imagen.jpg' },
+                    user: {
+                        type: 'object',
+                        properties: {
+                            id: { type: 'number', example: 3 },
+                            usuario: { type: 'string', example: 'Ilesandres' },
+                            contrasena: { type: 'string', example: 'admin123' },
+                            nombre: { type: 'string', example: 'andres' }
+                        }
+                    }
+                }
+            },
+            example: [
+                {
+                    id: 5,
+                    nombre: 'Concierto de Rock',
+                    descripcion: 'Un gran concierto de rock con bandas famosas.',
+                    fecha: '2025-07-15',
+                    hora: '20:00',
+                    ubicacion: 'Auditorio Nacional',
+                    organizador: 'Juan Perez',
+                    valor: '50.00',
+                    closed: false,
+                    imagen: 'http://example.com/imagen.jpg',
+                    user: {
+                        id: 3,
+                        usuario: 'Ilesandres',
+                        contrasena: 'admin123',
+                        nombre: 'andres'
+                    }
+                }
+            ]
+        }
+    })
+    @ApiResponse({
+        status: 500,
+        description: 'Error interno del servidor.',
+        schema: {
+            example: {
+                statusCode: 500,
+                message: 'Internal server error'
+            }
+        }
+    })
+    async getByuser(@Param('idUser') idUser:number){
+        return this.eventosService.getEventosByUserId(idUser);
     }
 
     @Put("update/id/:id")

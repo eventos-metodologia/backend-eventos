@@ -1,5 +1,6 @@
+import { EventoEntity } from "src/eventos/entity/evento.entity";
 import { RolEntity } from "src/rol/entity/rol.entity";
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity("user")
 export class UserEntity {
@@ -17,4 +18,7 @@ export class UserEntity {
 
     @ManyToOne(() => RolEntity, (rol) => rol.users, { onDelete: "CASCADE", eager: true })
     rol: RolEntity; // Cambiado de 'number' a 'RolEntity'
+
+    @OneToMany(() => EventoEntity, (evento) => evento.user, { onDelete: "CASCADE" })
+    evento: EventoEntity[];
 }

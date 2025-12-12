@@ -1,5 +1,7 @@
+import { CategoriaEntity } from "src/categoria/entity/categoria.entity";
 import { RegistrarEventoEntity } from "src/register_event/entity/register.evento.entity";
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { UserEntity } from "src/user/entity/user.entity";
+import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity("evento")
 export class EventoEntity{
@@ -21,7 +23,15 @@ export class EventoEntity{
     valor:string;
     @Column({type:"boolean", default:false})
     closed:boolean;
+    @Column({type:"text", nullable:true})
+    imagen:string;
+
+    @ManyToOne(()=> UserEntity,(user)=>user.evento, { nullable:true, onDelete: "CASCADE" })
+    user:UserEntity;
 
     @OneToMany(()=>RegistrarEventoEntity,(registro)=>registro.evento)
     registros:RegistrarEventoEntity[];
+
+    @ManyToOne(()=>CategoriaEntity,(categoria)=>categoria.eventos)
+    categoria:CategoriaEntity;
 }

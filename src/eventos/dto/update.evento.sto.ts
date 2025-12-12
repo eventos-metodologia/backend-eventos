@@ -27,4 +27,14 @@ export class UpdateEventoDto{
     @IsOptional()
     @ApiProperty({ example: '50.00', description: 'Valor de la entrada del evento',required:false })
     valor:string;
+    @IsOptional()
+    @IsString()
+    @ApiProperty({ example: 'http://example.com/imagen.jpg', description: 'URL de la imagen del evento',required:false })
+    imagen?:string;
+    @IsOptional()
+    @ApiProperty({ example: 1, description: 'ID de la categoría del evento',required:false })
+    categriaId:number;
+    @IsOptional()
+    @ApiProperty({ example: 1, description: 'ID del usuario que crea el evento',required:false })
+    userId:number;
 }

@@ -27,4 +27,14 @@ export class CreateEventoDto{
     @IsNotEmpty()
     @ApiProperty({ example: '50.00', description: 'Valor de la entrada del evento',required:true })
     valor:string;
+    @IsNotEmpty()
+    @IsString()
+    @ApiProperty({ example: 'http://example.com/imagen.jpg', description: 'URL de la imagen del evento',required:false })
+    imagen?:string;
+    @IsNotEmpty()
+    @ApiProperty({ example: 1, description: 'ID de la categoría del evento',required:true })
+    categriaId:number;
+    @IsNotEmpty()
+    @ApiProperty({ example: 1, description: 'ID del usuario que crea el evento',required:true })
+    userid:number;
 }
