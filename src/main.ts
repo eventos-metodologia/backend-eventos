@@ -10,6 +10,14 @@ async function bootstrap() {
   const configService= app.get(ConfigService);
   const port= configService.get<number>(APP_PORT) || 3000;
 
+  // Configurar CORS
+  //Url del frontend permitida-estatica
+  //Modificar dinamicamente segun la variables de entorno o fijo
+  app.enableCors({
+  origin: 'http://localhost:4200',
+  credentials: true,
+  });
+
   const config = new DocumentBuilder()
     .setTitle('API Metodología')
     .setDescription('Documentación de la API de Metodología')
