@@ -7,7 +7,7 @@ import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "ty
 export class EventoEntity{
     @PrimaryGeneratedColumn()
     id:number;
-    @Column({type:"varchar", length:100, unique:true, nullable:false})
+    @Column({type:"varchar", length:100, unique:false, nullable:false})
     nombre:string;
     @Column({type:"text", nullable:false})
     descripcion:string;
@@ -25,6 +25,8 @@ export class EventoEntity{
     closed:boolean;
     @Column({type:"text", nullable:true})
     imagen:string;
+    @Column({type:"varchar", length:100, nullable:true})
+    capacidad:string;
 
     @ManyToOne(()=> UserEntity,(user)=>user.evento, { nullable:true, onDelete: "CASCADE" })
     user:UserEntity;

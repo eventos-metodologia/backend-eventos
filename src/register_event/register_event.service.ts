@@ -41,6 +41,15 @@ export class RegisterEventService {
             if (eventoExists.closed) {
                 throw new BadRequestException('El evento al que intenta registrarse está cerrado');
             }
+            const countRegistersByEvent= await this.countRegistersByEvent(eventoExists.id);
+            if(countRegistersByEvent+1 > parseInt(eventoExists.capacidad)){
+                try {
+                    await this.eventosService.closedEevent(eventoExists.id);
+                } catch (error) {
+                    throw error;
+                }
+                throw new BadRequestException('El evento ha alcanzado su capacidad máxima de registros');
+            }
             const existEmailFromEvent = await this.registrarEventoRepository.createQueryBuilder('registro')
                 .where('registro.correo = :correo', { correo: dto.correo })
                 .andWhere('registro.evento = :evento', { evento: dto.evento })
@@ -85,6 +94,14 @@ export class RegisterEventService {
                 await this.mailerService.sendMail(mailOptions);
             } catch (error) {
                 console.warn('Error sending registration email:', error);
+            }
+            try {
+                const countAfterRegister = await this.countRegistersByEvent(eventoExists.id);
+                if (countAfterRegister >= parseInt(eventoExists.capacidad)) {
+                    await this.eventosService.closedEevent(eventoExists.id);
+                }
+            } catch (error) {
+                throw error;
             }
 
             return registerSaved;

@@ -37,4 +37,7 @@ export class CreateEventoDto{
     @IsNotEmpty()
     @ApiProperty({ example: 1, description: 'ID del usuario que crea el evento',required:true })
     userid:number;
+    @IsNotEmpty()
+    @ApiProperty({ example: 500, description: 'Capacidad máxima del evento',required:true })
+    capacidad:number;
 }

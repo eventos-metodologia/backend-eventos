@@ -37,4 +37,7 @@ export class UpdateEventoDto{
     @IsOptional()
     @ApiProperty({ example: 1, description: 'ID del usuario que crea el evento',required:false })
     userId:number;
+    @IsOptional()
+    @ApiProperty({ example: 500, description: 'Capacidad máxima del evento',required:false })
+    capacidad?:number;
 }
