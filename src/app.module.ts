@@ -10,6 +10,7 @@ import { SeederModule } from './config/seeder/seeder.module';
 import { EventosModule } from './eventos/eventos.module';
 import { RegisterEventModule } from './register_event/register_event.module';
 import { MailModule } from './mailer/mail.module';
+import { CategoriaModule } from './categoria/categoria.module';
 
 @Module({
   imports: [
@@ -38,7 +39,8 @@ import { MailModule } from './mailer/mail.module';
     SeederModule,
     EventosModule,
     RegisterEventModule,
-    MailModule
+    MailModule,
+    CategoriaModule
   ],
   controllers: [AppController],
   providers: [AppService],

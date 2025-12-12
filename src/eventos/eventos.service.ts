@@ -129,6 +129,9 @@ export class EventosService {
             if(eventoUpdate.valor !== undefined){
                 evento.valor = eventoUpdate.valor;
             }
+            if(eventoUpdate.imagen !== undefined){
+                evento.imagen = eventoUpdate.imagen;
+            }
             return await this.eventoRepository.save(evento);
         } catch (error) {
             throw error;

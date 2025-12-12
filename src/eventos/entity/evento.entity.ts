@@ -21,6 +21,8 @@ export class EventoEntity{
     valor:string;
     @Column({type:"boolean", default:false})
     closed:boolean;
+    @Column({type:"text", nullable:true})
+    imagen:string;
 
     @OneToMany(()=>RegistrarEventoEntity,(registro)=>registro.evento)
     registros:RegistrarEventoEntity[];
