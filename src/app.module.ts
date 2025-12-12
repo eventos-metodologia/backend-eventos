@@ -11,6 +11,7 @@ import { EventosModule } from './eventos/eventos.module';
 import { RegisterEventModule } from './register_event/register_event.module';
 import { MailModule } from './mailer/mail.module';
 import { CategoriaModule } from './categoria/categoria.module';
+import { UserModule } from './user/user.module';
 
 @Module({
   imports: [
@@ -28,7 +29,7 @@ import { CategoriaModule } from './categoria/categoria.module';
         password: configService.get(BD_PASSWORD),
         database: configService.get(BD_NAME),
         entities: [__dirname +'/**/*.entity{.ts,.js}'],
-        synchronize:false, // Cambiado a false para evitar la sincronización automática
+        synchronize:true, // Cambiado a false para evitar la sincronización automática
         migrationsRun:false, // Asegurarse de que las migraciones no se ejecuten automáticamente
         logging:false,
       }),
@@ -40,7 +41,8 @@ import { CategoriaModule } from './categoria/categoria.module';
     EventosModule,
     RegisterEventModule,
     MailModule,
-    CategoriaModule
+    CategoriaModule,
+    UserModule
   ],
   controllers: [AppController],
   providers: [AppService],

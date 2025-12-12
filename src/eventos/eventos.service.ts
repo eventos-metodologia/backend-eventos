@@ -5,12 +5,16 @@ import { Repository } from 'typeorm';
 import { SearchEventosDto } from './dto/search.dto';
 import { CreateEventoDto } from './dto/create.evento.dto';
 import { UpdateEventoDto } from './dto/update.evento.sto';
+import { UserService } from 'src/user/user.service';
+import { CategoriaService } from 'src/categoria/categoria.service';
 
 @Injectable()
 export class EventosService {
     constructor(
         @InjectRepository(EventoEntity)
         private readonly eventoRepository: Repository<EventoEntity>,
+        private readonly userService: UserService,
+        private readonly categoriaService: CategoriaService,
     ){}
 
     async findAll(dto:SearchEventosDto): Promise<EventoEntity[]>{
@@ -73,7 +77,21 @@ export class EventosService {
 
     async create(evento: CreateEventoDto):Promise<EventoEntity>{
         try {
-            const newEvento = this.eventoRepository.create(evento);
+            const user= await this.userService.findById(evento.userid);
+            const categoria = await this.categoriaService.findById(evento.categriaId);
+
+            const newEvento = this.eventoRepository.create({
+                nombre: evento.nombre,
+                fecha: evento.fecha,
+                hora: evento.hora,
+                ubicacion: evento.ubicacion,
+                organizador: evento.organizador,
+                descripcion: evento.descripcion,
+                valor: evento.valor,
+                imagen: evento.imagen,
+                categoria: categoria,
+                user: user
+            });
             return await this.eventoRepository.save(newEvento);
         } catch (error) {
             throw error;
@@ -132,7 +150,29 @@ export class EventosService {
             if(eventoUpdate.imagen !== undefined){
                 evento.imagen = eventoUpdate.imagen;
             }
+            if(evento.user  && eventoUpdate.userId == undefined){
+                throw new BadRequestException('El ID del usuario es obligatorio.');
+            }
+            if(evento.user.id !== eventoUpdate.userId && eventoUpdate.userId !== undefined){
+                throw new BadRequestException("no tiene permiso para actualizar este evento.");
+            }
+
             return await this.eventoRepository.save(evento);
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    async getEventosByUserId(userId:number):Promise<EventoEntity[]>{
+        try {
+            if(!userId || userId <= 0 || isNaN(userId)){
+                throw new BadRequestException('El ID de usuario proporcionado no es válido.');
+            }
+            const eventos = await this.eventoRepository.createQueryBuilder('evento')
+                .leftJoinAndSelect('evento.user', 'user')
+                .where('user.id = :userId', { userId })
+                .getMany();
+            return eventos;
         } catch (error) {
             throw error;
         }
