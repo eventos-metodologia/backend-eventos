@@ -24,8 +24,9 @@ export class EventosService {
     async findAll(dto: SearchEventosDto): Promise<EventoEntity[]> {
         try {
             const queryBuilder = this.eventoRepository.createQueryBuilder('evento')
-            .leftJoinAndSelect('evento.categoria', 'categoria')
-            .leftJoinAndSelect('evento.user', 'user');
+                .leftJoinAndSelect('evento.categoria', 'categoria')
+                .leftJoin('evento.user', 'user')
+                .addSelect(['user.id', 'user.usuario']);
             if (dto.searchParam) {
                 queryBuilder.andWhere('evento.nombre LIKE :searchParam OR evento.descripcion LIKE :searchParam OR evento.ubicacion LIKE :searchParam OR evento.organizador LIKE :searchParam', { searchParam: `%${dto.searchParam}%` });
             }
@@ -52,7 +53,7 @@ export class EventosService {
                     queryBuilder.andWhere('evento.valor > 0');
                 }
             }
-            
+
             const eventos = await queryBuilder.getMany();
             if (eventos.length === 0) {
                 throw new NotFoundException('No se encontraron eventos que coincidan con los criterios de búsqueda.');
@@ -76,7 +77,8 @@ export class EventosService {
             const evento = await this.eventoRepository.createQueryBuilder('evento')
                 .where('evento.id = :id', { id })
                 .leftJoinAndSelect('evento.categoria', 'categoria')
-                .leftJoinAndSelect('evento.user', 'user')
+                .leftJoin('evento.user', 'user')
+                .addSelect(['user.id', 'user.usuario'])
                 .getOne();
 
             if (!evento) {
