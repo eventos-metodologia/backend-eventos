@@ -11,7 +11,7 @@ import { MailModule } from 'src/mailer/mail.module';
   imports: [
     TypeOrmModule.forFeature([RegistrarEventoEntity]),
     MetodoPagoModule,
-    EventosModule,
+    forwardRef(()=> EventosModule),
     MailModule,
   ],
   controllers: [RegisterEventController],

@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, forwardRef, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { RegistrarEventoEntity } from './entity/register.evento.entity';
 import { Repository } from 'typeorm';
@@ -14,6 +14,7 @@ export class RegisterEventService {
         @InjectRepository(RegistrarEventoEntity)
         private readonly registrarEventoRepository: Repository<RegistrarEventoEntity>,
         private readonly metodoPagoService: MetodoPagoService,
+        @Inject(forwardRef(() => EventosService))
         private readonly eventosService: EventosService,
         private readonly mailerService: MailService
     ) { }

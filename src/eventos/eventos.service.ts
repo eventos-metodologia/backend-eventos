@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, forwardRef, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { EventoEntity } from './entity/evento.entity';
 import { Repository } from 'typeorm';
@@ -8,6 +8,7 @@ import { UpdateEventoDto } from './dto/update.evento.sto';
 import { UserService } from 'src/user/user.service';
 import { CategoriaService } from 'src/categoria/categoria.service';
 import { Cron, CronExpression } from '@nestjs/schedule';
+import { RegisterEventService } from 'src/register_event/register_event.service';
 
 @Injectable()
 export class EventosService {
@@ -16,11 +17,15 @@ export class EventosService {
         private readonly eventoRepository: Repository<EventoEntity>,
         private readonly userService: UserService,
         private readonly categoriaService: CategoriaService,
+        @Inject(forwardRef(() => RegisterEventService))
+        private readonly registroEventoService: RegisterEventService,
     ) { }
 
     async findAll(dto: SearchEventosDto): Promise<EventoEntity[]> {
         try {
-            const queryBuilder = this.eventoRepository.createQueryBuilder('evento');
+            const queryBuilder = this.eventoRepository.createQueryBuilder('evento')
+            .leftJoinAndSelect('evento.categoria', 'categoria')
+            .leftJoinAndSelect('evento.user', 'user');
             if (dto.searchParam) {
                 queryBuilder.andWhere('evento.nombre LIKE :searchParam OR evento.descripcion LIKE :searchParam OR evento.ubicacion LIKE :searchParam OR evento.organizador LIKE :searchParam', { searchParam: `%${dto.searchParam}%` });
             }
@@ -47,13 +52,17 @@ export class EventosService {
                     queryBuilder.andWhere('evento.valor > 0');
                 }
             }
+            
             const eventos = await queryBuilder.getMany();
             if (eventos.length === 0) {
                 throw new NotFoundException('No se encontraron eventos que coincidan con los criterios de búsqueda.');
             }
-            return eventos;
-
-
+            const eventosConCupos = await Promise.all(eventos.map(async (evento) => {
+                const registrosCount = await this.registroEventoService.countRegistersByEvent(evento.id);
+                const cuposDisponibles = Number(evento.capacidad) - registrosCount;
+                return { ...evento, cuposDisponibles };
+            }));
+            return eventosConCupos;
         } catch (error) {
             throw error;
         }
@@ -66,10 +75,16 @@ export class EventosService {
             }
             const evento = await this.eventoRepository.createQueryBuilder('evento')
                 .where('evento.id = :id', { id })
+                .leftJoinAndSelect('evento.categoria', 'categoria')
+                .leftJoinAndSelect('evento.user', 'user')
                 .getOne();
+
             if (!evento) {
                 throw new NotFoundException(`No se encontró ningún evento con ID ${id}.`);
             }
+            const contadordeRegistros = await this.registroEventoService.countRegistersByEvent(evento.id);
+            const cuposDisponibles = Number(evento.capacidad) - contadordeRegistros;
+            evento['cuposDisponibles'] = cuposDisponibles;
             return evento;
         } catch (error) {
             throw error;
@@ -78,7 +93,7 @@ export class EventosService {
 
     async create(evento: CreateEventoDto): Promise<EventoEntity> {
         try {
-            const user = await this.userService.findById(evento.userid);
+            const user = await this.userService.findById(evento.userId);
             const categoria = await this.categoriaService.findById(evento.categriaId);
 
             const newEvento = this.eventoRepository.create({
@@ -159,12 +174,43 @@ export class EventosService {
             if (evento.user.id !== eventoUpdate.userId && eventoUpdate.userId !== undefined) {
                 throw new BadRequestException("no tiene permiso para actualizar este evento.");
             }
-            if(eventoUpdate.categriaId !== undefined){
-                const categoria =  await this.categoriaService.findById(eventoUpdate.categriaId);
+            if (eventoUpdate.categriaId !== undefined) {
+                const categoria = await this.categoriaService.findById(eventoUpdate.categriaId);
                 evento.categoria = categoria;
             }
-            if(eventoUpdate.capacidad !== undefined){
+            let capacidadActualizada = evento.capacidad;
+            if (eventoUpdate.capacidad !== undefined) {
                 evento.capacidad = (eventoUpdate.capacidad).toString();
+                capacidadActualizada = evento.capacidad;
+            }
+
+            const now = new Date();
+            const eventDateTime = new Date(`${evento.fecha}T${evento.hora}`);
+            const registrosCount = await this.registroEventoService.countRegistersByEvent(evento.id);
+
+            if (
+                eventDateTime > now &&
+                Number(capacidadActualizada) > registrosCount
+            ) {
+                evento.closed = false;
+            }
+            else if (
+                eventoUpdate.capacidad !== undefined &&
+                eventDateTime > now &&
+                Number(eventoUpdate.capacidad) > registrosCount
+            ) {
+                evento.closed = false;
+            }
+            // Si la fecha y hora ya pasaron o la capacidad es menor o igual a los registros, mantener cerrado
+            else if (
+                eventDateTime <= now ||
+                Number(capacidadActualizada) <= registrosCount
+            ) {
+                evento.closed = true;
+            }
+
+            if (eventoUpdate.closed !== undefined) {
+                evento.closed = eventoUpdate.closed;
             }
 
             return await this.eventoRepository.save(evento);
@@ -198,7 +244,7 @@ export class EventosService {
         });
     }
 
-    async closedEevent(eventId:number): Promise<EventoEntity> {
+    async closedEevent(eventId: number): Promise<EventoEntity> {
         try {
             if (!eventId || eventId <= 0 || isNaN(eventId)) {
                 throw new BadRequestException('El ID proporcionado no es válido.');
@@ -208,7 +254,7 @@ export class EventosService {
                 .getOne();
             if (!evento) {
                 throw new NotFoundException(`No se encontró ningún evento con ID ${eventId}.`);
-            }  
+            }
             evento.closed = true;
             return await this.eventoRepository.save(evento);
         } catch (error) {
@@ -216,7 +262,7 @@ export class EventosService {
         }
     }
 
-    verifyAndClosedEventHora():void{
+    verifyAndClosedEventHora(): void {
         try {
             console.log('Iniciando verificación de eventos para cierre automático...');
             const currentDate = new Date();

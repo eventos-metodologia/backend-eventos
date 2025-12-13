@@ -40,4 +40,7 @@ export class UpdateEventoDto{
     @IsOptional()
     @ApiProperty({ example: 500, description: 'Capacidad máxima del evento',required:false })
     capacidad?:number;
+    @IsOptional()
+    @ApiProperty({ example: true, description: 'Indica si el evento está cerrado',required:false })
+    closed?:boolean;
 }
