@@ -220,7 +220,6 @@ export class EventosService {
             throw error;
         }
     }
-
     async getEventosByUserId(userId: number): Promise<EventoEntity[]> {
         try {
             if (!userId || userId <= 0 || isNaN(userId)) {
@@ -228,6 +227,7 @@ export class EventosService {
             }
             const eventos = await this.eventoRepository.createQueryBuilder('evento')
                 .leftJoinAndSelect('evento.user', 'user')
+                .leftJoinAndSelect('evento.categoria', 'categoria')
                 .where('user.id = :userId', { userId })
                 .getMany();
             return eventos;
